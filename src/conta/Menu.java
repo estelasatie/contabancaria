@@ -1,7 +1,10 @@
 package conta;
 
+import java.io.IOException;
+import java.util.InputMismatchException;
 import java.util.Scanner;
-import conta.model.Conta;
+
+import conta.controller.ContaController;
 import conta.model.ContaCorrente;
 import conta.model.ContaPoupanca;
 import conta.util.Cores;
@@ -9,31 +12,35 @@ import conta.util.Cores;
 public class Menu {
 
 	public static void main(String[] args) {
-
-		Conta c1 = new Conta(1, 123, 1, "Adriana", 10000.0f);
-
-		c1.visualizar();
-		c1.sacar(12000.0f);
-		c1.visualizar();
-		c1.depositar(5000.0f);
-		c1.visualizar();
+		
+		int opcao, numero, agencia, tipo, aniversario = 0;
+		String titular;
+		float saldo, limite;
+		
+		ContaController conta = new ContaController();
 
 		ContaCorrente cc1 = new ContaCorrente(1234567, 123, 2, "joao silva", 2500f, 1000f);
 		cc1.visualizar();
 		cc1.sacar(12000.0f);
-		cc1.visualizar();
 		cc1.depositar(5000.0f);
 		cc1.visualizar();
-		
+
 		ContaPoupanca cp1 = new ContaPoupanca(3, 123, 2, "Victor", 100000.0f, 15);
 		cp1.visualizar();
 		cp1.sacar(1000.0f);
-		cp1.visualizar();
 		cp1.depositar(5000.0f);
 		cp1.visualizar();
 
 		Scanner ler = new Scanner(System.in);
-		int opcao;
+		
+
+		try {
+			opcao = ler.nextInt();
+		} catch (InputMismatchException e) {
+			System.out.println("\nDigite valores inteiros!");
+			ler.nextLine();
+			opcao = 0;
+		}
 
 		while (true) {
 
@@ -59,6 +66,14 @@ public class Menu {
 
 			opcao = ler.nextInt();
 
+			try {
+				opcao = ler.nextInt();
+			} catch (InputMismatchException e) {
+				System.out.println("\nDigite valores inteiros!");
+				ler.nextLine();
+				opcao = 0;
+			}
+
 			if (opcao == 9) {
 				System.out.println(Cores.TEXT_WHITE_BOLD + "\nBanco do Brazil com Z - Seu futuro começa aqui!");
 				sobre();
@@ -70,11 +85,41 @@ public class Menu {
 
 			case 1:
 				System.out.println(Cores.TEXT_WHITE_BOLD + "Criar conta\n\n");
+				System.out.println("\nDigite o número da agência: ");
+				agencia = ler.nextInt();
+				System.out.println("\nDigite o nome do titular: ");
+				ler.skip("\\R?");
+				titular = ler.nextLine();
+				
+				do {
+					System.out.println("Digite o tipo de conta (1- Conta Corrente  2- Conta Poupança)");
+					tipo = ler.nextInt();
+				} while (tipo < 1 && tipo >2);
+				
+				System.out.println("Digite o saldo da conta: "); 
+				saldo = ler.nextFloat();
+				
+				switch (tipo) {
+				
+				case 1 -> {
+					System.out.println("Digite o limite de crédito: ");
+					limite = ler.nextFloat();
+					conta.cadastrar(new ContaCorrente(conta.gerarNumero(), agencia, tipo, titular, saldo, aniversario));
+				}
+					
+					case 2 -> {
+						System.out.println("Digite o dia do aniversario da conta: ");
+						aniversario = ler.nextInt();
+						conta.cadastrar(new ContaPoupanca(conta.gerarNumero(), agencia, tipo, titular, saldo, aniversario));
+					}
+				}
+				
 
 				break;
 
 			case 2:
 				System.out.println(Cores.TEXT_WHITE_BOLD + "Listar todas as contas\n\n");
+				conta.listarTodas();
 
 				break;
 
@@ -124,4 +169,18 @@ public class Menu {
 
 	}
 
+	public static void keyPress() {
+
+		try {
+
+			System.out.println(Cores.TEXT_RESET + "\n\nPressione Enter para Continuar...");
+			System.in.read();
+
+		} catch (IOException e) {
+
+			System.out.println("Você pressionou uma tecla diferente de enter!");
+
+		}
+
+	}
 }
